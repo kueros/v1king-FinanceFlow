@@ -22,7 +22,7 @@ function IncomeTable({ rows, categories, onChange, onToggle, onRemove, onAdd }: 
   const total = rows.reduce((a, r) => a + (parseFloat(r.ars) || 0), 0);
   const totalUsd = rows.reduce((a, r) => a + (parseFloat(r.usd) || 0), 0);
   const confirmed = rows.filter(r => r.isConfirmed).reduce((a, r) => a + (parseFloat(r.ars) || 0), 0);
-  const cols = '44px 1.6fr .9fr 1fr .8fr 100px';
+  const cols = '44px 1.6fr 1fr .8fr 60px';
 
   return (
     <section className="panel">
@@ -41,7 +41,6 @@ function IncomeTable({ rows, categories, onChange, onToggle, onRemove, onAdd }: 
       <div className="ledger-head" style={{ gridTemplateColumns: cols }}>
         <div></div>
         <div>Concepto</div>
-        <div>Categoría</div>
         <div className="t-right">Monto ARS</div>
         <div className="t-right">USD</div>
         <div className="t-right">Estado</div>
@@ -55,13 +54,6 @@ function IncomeTable({ rows, categories, onChange, onToggle, onRemove, onAdd }: 
                 onChange={(e) => onChange(r.id, 'description', e.target.value)}
                 placeholder="Salario / Cliente / Honorarios…" />
             </div>
-            <div>
-              <select className="cell-input" value={r.category || 'Ingreso'}
-                onChange={(e) => onChange(r.id, 'category', e.target.value)}>
-                <option>Ingreso</option>
-                {categories.map(c => <option key={c.id}>{c.nombre}</option>)}
-              </select>
-            </div>
             <div className="t-right">
               <input className="cell-input mono" type="number" value={r.ars}
                 onChange={(e) => onChange(r.id, 'ars', e.target.value)} placeholder="0" />
@@ -73,9 +65,9 @@ function IncomeTable({ rows, categories, onChange, onToggle, onRemove, onAdd }: 
             <div className="t-right" style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, alignItems: 'center' }}>
               <button className={'pill ' + (r.isConfirmed ? 'confirmed' : 'pending')}
                 onClick={() => onToggle(r.id)}
-                title={r.isConfirmed ? 'Confirmado' : 'Pendiente'}>
+                title={r.isConfirmed ? 'Confirmado' : 'Pendiente'}
+                style={{ padding: '4px 8px' }}>
                 {r.isConfirmed ? <Check size={11} strokeWidth={2} /> : <Clock size={11} strokeWidth={1.75} />}
-                {r.isConfirmed ? 'Cobrado' : 'Pendiente'}
               </button>
               <button className="ibtn danger" onClick={() => onRemove(r.id)} title="Eliminar">
                 <Trash2 size={14} strokeWidth={1.75} />
