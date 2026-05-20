@@ -2,12 +2,10 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Header, StatusStrip, type TabId } from './components/Header';
 import { ActionModal, type ModalState } from './components/Modal';
 import { Dashboard } from './components/Dashboard';
-import { Cards } from './components/Cards';
 import { Config } from './components/Config';
 import { Colophon } from './components/Colophon';
 import type {
-  AppState, IncomeRow, FixedExpense, AccountBalances,
-  CreditCard, CreditCardCharge, Category, CardStats,
+  AppState, IncomeRow, FixedExpense, AccountBalances, Category,
 } from './types';
 
 const DEFAULT_CATEGORIES: Category[] = [
@@ -33,13 +31,8 @@ const INITIAL_STATE: AppState = {
   fixedExpenses: [
     { id: uid(), description: '', dueDay: '', category: 'Servicios', toPay: '', paid: '', isFullyPaid: false },
   ],
-  creditCards: [
-    { id: uid(), name: 'Visa Galicia',  expenses: [] },
-    { id: uid(), name: 'Master BBVA',   expenses: [] },
-    { id: uid(), name: 'Amex Directa',  expenses: [] },
-    { id: uid(), name: 'Naranja X',     expenses: [] },
-  ],
   categories: DEFAULT_CATEGORIES,
+  cardPayment: '',
 };
 
 const STORAGE_KEY = 'financeflow_v3';
@@ -49,7 +42,7 @@ function loadState(): AppState {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed.creditCards && parsed.creditCards.length >= 4 && parsed.balances) {
+      if (parsed.balances && parsed.incomeRows && parsed.fixedExpenses) {
         if (!parsed.categories) parsed.categories = DEFAULT_CATEGORIES;
         return parsed;
       }
@@ -121,28 +114,11 @@ export default function App() {
   };
   const setPrevMonth = (v: string) => setState(p => ({ ...p, prevMonthBalance: v }));
   const setRate = (v: string) => setState(p => ({ ...p, exchangeRate: v }));
-
-  /* — Cards — */
-  const updateCardName = (cardId: string, name: string) => setState(p => ({
-    ...p, creditCards: p.creditCards.map(c => c.id === cardId ? { ...c, name } : c)
-  }));
-  const addCardExpense = (cardId: string) => setState(p => ({
-    ...p,
-    creditCards: p.creditCards.map(c => c.id === cardId ? {
-      ...c,
-      expenses: [...c.expenses, { id: uid(), description: '', date: '', category: 'Compras', currentInstallment: '1', totalInstallments: '1', amount: '', isConfirmed: false }]
-    } : c)
-  }));
-  const updateCardExpense = (cardId: string, expId: string, field: keyof CreditCardCharge, value: string | boolean) => setState(p => ({
-    ...p,
-    creditCards: p.creditCards.map(c => c.id === cardId ? {
-      ...c, expenses: c.expenses.map(e => e.id === expId ? { ...e, [field]: value } as CreditCardCharge : e)
-    } : c)
-  }));
-  const removeCardExpense = (cardId: string, expId: string) => setState(p => ({
-    ...p,
-    creditCards: p.creditCards.map(c => c.id === cardId ? { ...c, expenses: c.expenses.filter(e => e.id !== expId) } : c)
-  }));
+  const setCardPayment = (v: string) => {
+    if (v === '' || /^\d*\.?\d*$/.test(v)) {
+      setState(p => ({ ...p, cardPayment: v }));
+    }
+  };
 
   /* — Categories — */
   const handleAddCategory = (nombre: string, color: string) => setState(p => ({
@@ -155,9 +131,6 @@ export default function App() {
       ...p,
       categories: p.categories.filter(c => c.id !== id),
       fixedExpenses: p.fixedExpenses.map(e => e.category === target.nombre ? { ...e, category: 'Varios' } : e),
-      creditCards: p.creditCards.map(c => ({
-        ...c, expenses: c.expenses.map(e => e.category === target.nombre ? { ...e, category: 'Varios' } : e)
-      }))
     };
   });
 
@@ -171,29 +144,16 @@ export default function App() {
     const sum = Object.values(state.balances).reduce((a, v) => a + (parseFloat(v) || 0), 0);
     return sum + toCollect;
   }, [state.balances, toCollect]);
-  const cardStats = useMemo<CardStats>(() => {
-    let currentTotal = 0, forecastTotal = 0, confirmedTotal = 0, pendingTotal = 0;
-    state.creditCards.forEach(card => card.expenses.forEach(exp => {
-      const amt = parseFloat(exp.amount) || 0;
-      const current = parseInt(exp.currentInstallment) || 0;
-      const total = parseInt(exp.totalInstallments) || 0;
-      currentTotal += amt;
-      if (current < total) forecastTotal += amt;
-      if (exp.isConfirmed) confirmedTotal += amt; else pendingTotal += amt;
-    }));
-    return { currentTotal, forecastTotal, confirmedTotal, pendingTotal };
-  }, [state.creditCards]);
   const totals = useMemo(() => {
-    const toPay = state.fixedExpenses.reduce((a, e) => a + (parseFloat(e.toPay) || 0), 0);
+    const toPay = state.fixedExpenses.reduce((a, e) => a + (parseFloat(e.toPay) || 0), 0) + (parseFloat(state.cardPayment) || 0);
     const paid  = state.fixedExpenses.reduce((a, e) => a + (parseFloat(e.paid)  || 0), 0);
-    return { paid: paid + cardStats.confirmedTotal, pending: (toPay - paid) + cardStats.pendingTotal };
-  }, [state.fixedExpenses, cardStats]);
+    return { paid, pending: toPay - paid };
+  }, [state.fixedExpenses, state.cardPayment]);
   const expenseCounts = useMemo<Record<string, number>>(() => {
     const m: Record<string, number> = {};
     state.fixedExpenses.forEach(e => { m[e.category] = (m[e.category] || 0) + 1; });
-    state.creditCards.forEach(c => c.expenses.forEach(e => { m[e.category] = (m[e.category] || 0) + 1; }));
     return m;
-  }, [state.fixedExpenses, state.creditCards]);
+  }, [state.fixedExpenses]);
 
   /* — Backups & period switch — */
   const downloadBackup = () => {
@@ -208,12 +168,6 @@ export default function App() {
     state.incomeRows.forEach(r => { if (r.description || r.ars) csv += `${r.description || '-'};${r.ars || 0};${r.usd || 0};${r.isConfirmed ? 'SÍ' : 'NO'}\n`; });
     csv += '\n--- GASTOS FIJOS ---\nDescripción;Día;Categoría;A pagar;Pagado;Estado\n';
     state.fixedExpenses.forEach(e => { if (e.description || e.toPay) csv += `${e.description || '-'};${e.dueDay};${e.category};${e.toPay};${e.paid};${e.isFullyPaid ? 'SALDADO' : 'PENDIENTE'}\n`; });
-    csv += '\n--- TARJETAS ---\n';
-    state.creditCards.forEach(c => {
-      csv += `${c.name.toUpperCase()}\nConcepto;Cuota;De;ARS;Confirmado\n`;
-      c.expenses.forEach(e => { csv += `${e.description || '-'};${e.currentInstallment};${e.totalInstallments};${e.amount};${e.isConfirmed ? 'SÍ' : 'NO'}\n`; });
-      csv += '\n';
-    });
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -233,7 +187,7 @@ export default function App() {
       const text = await file.text();
       if (file.name.endsWith('.json')) {
         const parsed = JSON.parse(text);
-        if (parsed.incomeRows && parsed.balances && parsed.creditCards) {
+        if (parsed.incomeRows && parsed.balances && parsed.fixedExpenses) {
           setState(parsed);
           setActiveTab('dashboard');
         } else throw new Error('Formato JSON inválido.');
@@ -254,12 +208,6 @@ export default function App() {
         prevMonthBalance: subtotalBalances.toString(),
         incomeRows: p.incomeRows.map(r => ({ ...r, isConfirmed: false })),
         fixedExpenses: p.fixedExpenses.map(r => ({ ...r, isFullyPaid: false, paid: '' })),
-        creditCards: p.creditCards.map(card => ({
-          ...card,
-          expenses: card.expenses
-            .map(exp => ({ ...exp, currentInstallment: (parseInt(exp.currentInstallment) + 1).toString(), isConfirmed: false }))
-            .filter(exp => parseInt(exp.currentInstallment) <= parseInt(exp.totalInstallments))
-        }))
       }));
     }
   });
@@ -306,6 +254,8 @@ export default function App() {
                 onTogglePaid: toggleFixedPaid,
                 onRemove: removeFixed,
                 onAdd: addFixed,
+                cardPayment: state.cardPayment,
+                onCardPayment: setCardPayment,
               }}
               treasury={{
                 balances: state.balances,
@@ -317,17 +267,6 @@ export default function App() {
               period={period}
               subtotalBalances={subtotalBalances}
               totals={totals}
-            />
-          )}
-          {activeTab === 'cards' && (
-            <Cards
-              creditCards={state.creditCards}
-              categories={state.categories}
-              cardStats={cardStats}
-              updateCardName={updateCardName}
-              addCardExpense={addCardExpense}
-              updateCardExpense={updateCardExpense}
-              removeCardExpense={removeCardExpense}
             />
           )}
           {activeTab === 'config' && (

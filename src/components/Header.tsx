@@ -3,7 +3,6 @@ import { TrendingUp, Upload, Download, CalendarDays } from 'lucide-react';
 
 const TABS = [
   { id: 'dashboard', label: 'Arqueo',   sub: 'Treasury' },
-  { id: 'cards',     label: 'Tarjetas', sub: 'Credit'   },
   { id: 'config',    label: 'Config',   sub: 'Taxonomy' },
 ] as const;
 

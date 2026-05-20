@@ -113,9 +113,11 @@ interface FixedProps {
   onTogglePaid: (id: string) => void;
   onRemove: (id: string) => void;
   onAdd: () => void;
+  cardPayment: string;
+  onCardPayment: (v: string) => void;
 }
-function FixedExpenses({ rows, categories, onChange, onTogglePaid, onRemove, onAdd }: FixedProps) {
-  const totalToPay = rows.reduce((a, r) => a + (parseFloat(r.toPay) || 0), 0);
+function FixedExpenses({ rows, categories, onChange, onTogglePaid, onRemove, onAdd, cardPayment, onCardPayment }: FixedProps) {
+  const totalToPay = rows.reduce((a, r) => a + (parseFloat(r.toPay) || 0), 0) + (parseFloat(cardPayment) || 0);
   const totalPaid = rows.reduce((a, r) => a + (parseFloat(r.paid) || 0), 0);
   const sorted = [...rows].sort((a, b) => (parseInt(a.dueDay) || 99) - (parseInt(b.dueDay) || 99));
   const catColor = (name: string) => categories.find(c => c.nombre === name)?.color || '#888';
@@ -192,6 +194,20 @@ function FixedExpenses({ rows, categories, onChange, onTogglePaid, onRemove, onA
             <span className="muted small">— Sin gastos fijos cargados —</span>
           </div>
         )}
+        <div className={'ledger-row card-payment'} style={{ gridTemplateColumns: cols, background: 'color-mix(in srgb, var(--accent-wash) 50%, transparent)', borderTop: '2px solid var(--accent)' }}>
+          <div></div>
+          <div>
+            <span className="eyebrow accent" style={{ fontSize: 11 }}>Pago de Tarjetas</span>
+          </div>
+          <div></div>
+          <div className="t-center"></div>
+          <div className="t-right">
+            <input className="cell-input mono accent" type="number" value={cardPayment}
+              onChange={(e) => onCardPayment(e.target.value)} placeholder="0" style={{ fontWeight: 600, color: 'var(--accent)' }} />
+          </div>
+          <div className="t-right"></div>
+          <div className="t-right"></div>
+        </div>
       </div>
 
       <div className="panel-foot">
@@ -365,7 +381,7 @@ export function Dashboard(props: DashboardProps) {
           deck="Movimientos saldados en el período corriente."
           tone="neutral" icon={<Check size={16} strokeWidth={1.75} />} />
         <Kpi eyebrow="03 · Exposición" title="Riesgo · Por Pagar" value={totals.pending}
-          deck="Carga restante entre gastos fijos y tarjetas pendientes."
+          deck="Gastos fijos pendientes de saldo en el período corriente."
           tone="accent" icon={<ArrowDownRight size={16} strokeWidth={1.75} />} />
       </div>
 

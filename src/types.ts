@@ -26,23 +26,6 @@ export interface FixedExpense {
   isFullyPaid: boolean;
 }
 
-export interface CreditCardCharge {
-  id: string;
-  description: string;
-  date: string;
-  category: string;
-  currentInstallment: string;
-  totalInstallments: string;
-  amount: string;
-  isConfirmed: boolean;
-}
-
-export interface CreditCard {
-  id: string;
-  name: string;
-  expenses: CreditCardCharge[];
-}
-
 export interface Category {
   id: string;
   nombre: string;
@@ -54,14 +37,7 @@ export interface AppState {
   balances: AccountBalances;
   prevMonthBalance: string;
   fixedExpenses: FixedExpense[];
-  creditCards: CreditCard[];
   exchangeRate: string;
   categories: Category[];
-}
-
-export interface CardStats {
-  currentTotal: number;
-  forecastTotal: number;
-  confirmedTotal: number;
-  pendingTotal: number;
+  cardPayment: string;
 }
