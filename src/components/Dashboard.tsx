@@ -257,7 +257,7 @@ function TreasuryNodes({ balances, prevMonthBalance, toCollect, onBalance, onPre
       <div className="panel-head">
         <div className="hd-left">
           <span className="eyebrow">§ 03</span>
-          <h2 className="section-title">Nodos de Arqueo</h2>
+          <h2 className="section-title">Bancos y Billeteras</h2>
         </div>
         <span className="pill"><span className="dot" style={{ background: 'var(--positive)' }} /> Líquido</span>
       </div>
@@ -304,7 +304,7 @@ function TreasuryNodes({ balances, prevMonthBalance, toCollect, onBalance, onPre
       </div>
 
       <div className="treasury-foot">
-        <span className="eyebrow">Subtotal nodos</span>
+        <span className="eyebrow">Total</span>
         <span className="figure huge">${fmtMoney(total)}</span>
       </div>
 
@@ -375,13 +375,13 @@ export function Dashboard(props: DashboardProps) {
 
       <div className="kpis">
         <Kpi eyebrow="01 · Activos" title="Arqueo General" value={subtotalBalances}
-          deck="Suma líquida de nodos más cuentas por cobrar confirmadas."
+          deck="Arqueo de ingresos y cuentas por cobrar confirmadas."
           tone="gilt" icon={<Coins size={16} strokeWidth={1.75} />} />
         <Kpi eyebrow="02 · Ejecutado" title="Total Pagado" value={totals.paid}
           deck="Movimientos saldados en el período corriente."
           tone="neutral" icon={<Check size={16} strokeWidth={1.75} />} />
-        <Kpi eyebrow="03 · Exposición" title="Riesgo · Por Pagar" value={totals.pending}
-          deck="Gastos fijos pendientes de saldo en el período corriente."
+        <Kpi eyebrow="03 · Exposición" title="Por Pagar" value={totals.pending}
+          deck="Gastos fijos pendientes de pago en el período corriente."
           tone="accent" icon={<ArrowDownRight size={16} strokeWidth={1.75} />} />
       </div>
 
