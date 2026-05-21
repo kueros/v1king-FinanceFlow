@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { TrendingUp, Upload, Download, CalendarDays } from 'lucide-react';
 
 const TABS = [
-  { id: 'dashboard', label: 'Arqueo',   sub: 'Treasury' },
-  { id: 'config',    label: 'Config',   sub: 'Taxonomy' },
+  { id: 'dashboard', label: 'Arqueo',   sub: 'Finanzas' },
+  { id: 'config',    label: 'Config',   sub: 'Categorías' },
 ] as const;
 
 export type TabId = typeof TABS[number]['id'];
@@ -21,7 +21,7 @@ function Brandmark() {
         <div className="brand-title">FinanceFlow</div>
         <div className="brand-sub">
           <span className="live-dot" />
-          Núcleo · Personal Treasury
+          Núcleo · Finanzas Personales
         </div>
       </div>
       <style>{`

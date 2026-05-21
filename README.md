@@ -1,51 +1,33 @@
-# v1King · FinanceFlow
+# 📊 FinanceFlow: Core Cash Flow Management
 
-Centro de control de tesorería personal — arqueo de cuentas, gastos fijos, tarjetas de crédito y categorías.
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-**Stack:** Vite + React 19 + TypeScript · Tailwind disponible · Lucide · Datos en `localStorage`.
+FinanceFlow es una Single Page Application (SPA) moderna diseñada para el control exhaustivo del flujo de caja personal. Este proyecto nació de la necesidad de tener un control financiero estricto y evolucionó hacia una arquitectura modular. 
 
----
+> **💡 Visión Arquitectónica:** Inicialmente un monolito, FinanceFlow fue refactorizado aplicando principios de diseño orientados al dominio (DDD). Toda la lógica compleja de tarjetas de crédito y cuotas fue abstraída a un microservicio independiente llamado [CardFlow](URL_DE_TU_REPO_CARDFLOW), dejando a FinanceFlow enfocado exclusivamente en la liquidez diaria, ingresos y gastos fijos.
 
-## Marca
+## 🚀 Características Principales (Features)
 
-| Token        | Valor       | Uso                                |
-| ------------ | ----------- | ---------------------------------- |
-| `--ink-2`    | `#1A1A1A`   | Primario / fondos en dark          |
-| `--parchment`| `#F5F1E8`   | Texto sobre dark / fondo en light  |
-| `--crimson`  | `#C41E3A`   | Acento, acciones, riesgo           |
-| `--gilt`     | `#D4AF37`   | Confirmado, "cobrado", positivo    |
+* **Flujo de Ingresos Multimoneda:** Soporte nativo para ingresos en pesos y dólares con conversión y cálculo en tiempo real.
+* **Arqueo General Dinámico:** Sistema de nodos que consolida saldos de múltiples billeteras virtuales y cuentas bancarias para calcular la liquidez exacta (Total Pagado vs. Por Pagar).
+* **Gestión de Gastos Fijos:** Tabla interactiva ordenada cronológicamente para el seguimiento de obligaciones mensuales.
+* **CRUD Centralizado de Categorías:** Configuración global de categorías de gastos que alimenta de forma reactiva a toda la aplicación.
+* **Persistencia Local y Portabilidad:** Almacenamiento seguro en el `localStorage` del navegador con capacidad integral de exportación e importación de bases de datos en formatos `.CSV` y `.JSON`.
+* **Diseño UI/UX "Pixel Perfect":** Interfaz en Modo Oscuro (Dark Mode) construida con Tailwind CSS, con tipografía dinámica y alineaciones estrictas para la lectura de datos financieros.
 
-Tipografías: **Space Grotesk** (display) · **Inter** (cuerpo) · **JetBrains Mono** (cifras).
-Radii máximo: `4px`. Dark-mode first.
+## 🛠️ Stack Tecnológico
 
----
+* **Frontend:** React.js con Hooks (useState, useMemo, useEffect).
+* **Lenguaje:** TypeScript para tipado estático estricto e interfaces de datos financieras.
+* **Build Tool:** Vite (reemplazando CRA para tiempos de compilación ultrarrápidos).
+* **Estilos:** Tailwind CSS v3 (configurado vía PostCSS).
+* **Iconografía:** Lucide React.
 
-## Desarrollo
+## ⚙️ Instalación y Uso Local
 
-```bash
-npm install
-npm run dev        # http://localhost:3000
-npm run build      # bundle a dist/
-npm run preview    # servir dist/
-```
-
-> En desarrollo local, si querés evitar el `base` de Pages, ejecutá:
-> `VITE_BASE=/ npm run dev`
-
----
-
-## Despliegue en GitHub Pages
-
-El workflow `.github/workflows/deploy.yml` se dispara con cada push a `main`:
-
-1. En el repo, **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-2. Hacé push a `main`. El workflow corre `npm run build` con `VITE_BASE=/v1king-FinanceFlow/` y publica `dist/`.
-3. La app queda en `https://kueros.github.io/v1king-FinanceFlow/`.
-
-Para un dominio custom: setear el CNAME en `public/CNAME` y cambiar `VITE_BASE` a `/` en el workflow.
-
----
-
-## Datos
-
-Todo se guarda local en `localStorage` bajo la key `financeflow_v3`. El botón **Cambio de Mes** genera un resguardo JSON automático antes de reciclar el período.
+1. Clonar el repositorio:
+   ```bash
+   git clone [https://github.com/tu-usuario/financeflow.git](https://github.com/tu-usuario/financeflow.git)
